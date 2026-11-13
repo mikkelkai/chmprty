@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Countdown to the Christmas party</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #D6E3DC;
+    --ink: #173022;
+    --muted: #456352;
+    --berry: #B3202A;
+    --paper: #FFFFFF;
+    --wire: #1F3A2B;
+    --snow: #FFFFFF;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F2219;
+      --ink: #EEF3EF;
+      --muted: #A3BBAC;
+      --berry: #D63A43;
+      --paper: #F6F2EE;
+      --wire: #5E7F6C;
+      --snow: #EAF2EE;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F2219;
+    --ink: #EEF3EF;
+    --muted: #A3BBAC;
+    --berry: #D63A43;
+    --paper: #F6F2EE;
+    --wire: #5E7F6C;
+    --snow: #EAF2EE;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  #snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+  .lights { position: absolute; top: 0; left: 0; width: 100%; height: 90px; z-index: 2; pointer-events: none; }
+  .lights svg { width: 100%; height: 100%; display: block; }
+  .bulb { animation: twinkle 3s ease-in-out infinite; }
+  @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+  main {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 1.5rem 3rem;
+  }
+
+  .ornament { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem; }
+  .string { width: 2px; height: clamp(60px, 14vh, 130px); background: var(--wire); }
+  .heart { width: clamp(110px, 18vw, 160px); margin-top: -2px; }
+  .heart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .swing { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; animation: sway 5s ease-in-out infinite; }
+  @keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+
+  h1 {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4.2vw, 2.8rem);
+    line-height: 1.15;
+    margin: 0 0 1.5rem;
+  }
+
+  .clock { display: flex; gap: clamp(0.6rem, 2.5vw, 1.75rem); justify-content: center; }
+  .unit { display: flex; flex-direction: column; align-items: center; }
+  .num {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-size: clamp(3.4rem, 12vw, 8rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    min-width: 2ch;
+  }
+  .lbl { color: var(--muted); font-size: 1rem; margin-top: 0.5rem; }
+  .sep {
+    font-family: "Young Serif", Georgia, serif;
+    font-size: clamp(3.4rem, 12vw, 8rem);
+    line-height: 1;
+    color: var(--berry);
+  }
+
+  .done { display: none; }
+  .is-done .clock { display: none; }
+  .is-done .done { display: block; }
+  .done p {
+    font-family: "Young Serif", Georgia, serif;
+    font-size: clamp(2.6rem, 8vw, 5rem);
+    line-height: 1.05;
+    margin: 0 0 0.75rem;
+    color: var(--berry);
+  }
+  .done small { color: var(--muted); font-size: 1.1rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .swing, .bulb { animation: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="lights" aria-hidden="true"><svg id="lights"></svg></div>
+
+<main id="app">
+  <div class="ornament" aria-hidden="true">
+    <div class="swing">
+      <div class="string"></div>
+      <div class="heart">
+        <!-- Danish woven paper heart (julehjerte) -->
+        <svg viewBox="-84 -16 168 154">
+          <defs>
+            <pattern id="weave" width="50" height="50" patternUnits="userSpaceOnUse">
+              <rect width="50" height="50" fill="var(--paper)"/>
+              <rect width="25" height="25" fill="var(--berry)"/>
+              <rect x="25" y="25" width="25" height="25" fill="var(--berry)"/>
+            </pattern>
+            <clipPath id="lobeR"><circle cx="50" cy="0" r="50"/></clipPath>
+            <clipPath id="lobeL"><circle cx="0" cy="50" r="50"/></clipPath>
+          </defs>
+          <line x1="0" y1="-16" x2="0" y2="2" stroke="var(--wire)" stroke-width="2"/>
+          <g transform="rotate(45) scale(0.95)">
+            <!-- right lobe: white strips -->
+            <circle cx="50" cy="0" r="50" fill="var(--paper)"/>
+            <g clip-path="url(#lobeR)" stroke="var(--berry)" stroke-opacity="0.35" stroke-width="1.2">
+              <line x1="25" y1="0" x2="25" y2="-60"/>
+              <line x1="50" y1="0" x2="50" y2="-60"/>
+              <line x1="75" y1="0" x2="75" y2="-60"/>
+            </g>
+            <!-- left lobe: red strips -->
+            <circle cx="0" cy="50" r="50" fill="var(--berry)"/>
+            <g clip-path="url(#lobeL)" stroke="var(--paper)" stroke-opacity="0.45" stroke-width="1.2">
+              <line x1="0" y1="25" x2="-60" y2="25"/>
+              <line x1="0" y1="50" x2="-60" y2="50"/>
+              <line x1="0" y1="75" x2="-60" y2="75"/>
+            </g>
+            <!-- woven square -->
+            <rect x="0" y="0" width="100" height="100" fill="url(#weave)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <h1>Christmas party</h1>
+
+  <div class="clock" role="timer" aria-live="off" aria-label="Time left until the party">
+    <div class="unit"><span class="num" id="h">0</span><span class="lbl">hours</span></div>
+    <span class="sep">:</span>
+    <div class="unit"><span class="num" id="m">00</span><span class="lbl">minutes</span></div>
+    <span class="sep">:</span>
+    <div class="unit"><span class="num" id="s">00</span><span class="lbl">seconds</span></div>
+  </div>
+
+  <div class="done" aria-live="polite">
+    <p>Glædelig jul!<br>The party has started.</p>
+    <small id="since"></small>
+  </div>
+</main>
+
+<script>
+  // 14:30 Copenhagen time on 13 November 2026 (CET, UTC+1)
+  const TARGET = Date.parse("2026-11-13T14:30:00+01:00");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- Countdown ----------
+  const app = document.getElementById("app");
+  const hEl = document.getElementById("h");
+  const mEl = document.getElementById("m");
+  const sEl = document.getElementById("s");
+  const since = document.getElementById("since");
+  const pad = n => String(n).padStart(2, "0");
+
+  function tick() {
+    const left = TARGET - Date.now();
+    if (left <= 0) {
+      app.classList.add("is-done");
+      const mins = Math.floor(-left / 60000);
+      since.textContent = mins < 1 ? "It started just now."
+        : `It started ${mins} minute${mins === 1 ? "" : "s"} ago.`;
+      document.title = "Glædelig jul!";
+      return;
+    }
+    const total = Math.floor(left / 1000);
+    const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+    hEl.textContent = h;
+    mEl.textContent = pad(m);
+    sEl.textContent = pad(s);
+    document.title = `${h}:${pad(m)}:${pad(s)} to the Christmas party`;
+  }
+  tick();
+  setInterval(tick, 250);
+
+  // ---------- String of lights ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const lightsSvg = document.getElementById("lights");
+  const bulbColors = ["#E8443F", "#F4B63F", "#3FA66A", "#4C8FE0", "#F07AB0"];
+
+  function drawLights() {
+    const w = window.innerWidth, h = 90;
+    lightsSvg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    lightsSvg.innerHTML = "";
+    const swags = Math.max(2, Math.round(w / 320));
+    const sw = w / swags;
+    let d = "M0 6";
+    for (let i = 0; i < swags; i++) {
+      const x0 = i * sw;
+      d += ` Q ${x0 + sw / 2} 70 ${x0 + sw} 6`;
+    }
+    const wire = document.createElementNS(NS, "path");
+    wire.setAttribute("d", d);
+    wire.setAttribute("fill", "none");
+    wire.setAttribute("stroke", "var(--wire)");
+    wire.setAttribute("stroke-width", "2");
+    lightsSvg.appendChild(wire);
+
+    const perSwag = 7;
+    let k = 0;
+    for (let i = 0; i < swags; i++) {
+      const x0 = i * sw;
+      for (let j = 1; j < perSwag; j++) {
+        const t = j / perSwag;
+        // point on quadratic: P0=(x0,6), P1=(x0+sw/2,70), P2=(x0+sw,6)
+        const x = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * (x0 + sw / 2) + t * t * (x0 + sw);
+        const y = (1 - t) ** 2 * 6 + 2 * (1 - t) * t * 70 + t * t * 6;
+        const g = document.createElementNS(NS, "g");
+        g.setAttribute("transform", `translate(${x} ${y})`);
+        const cap = document.createElementNS(NS, "rect");
+        cap.setAttribute("x", "-3"); cap.setAttribute("y", "0");
+        cap.setAttribute("width", "6"); cap.setAttribute("height", "6");
+        cap.setAttribute("rx", "1"); cap.setAttribute("fill", "var(--wire)");
+        const bulb = document.createElementNS(NS, "ellipse");
+        bulb.setAttribute("cx", "0"); bulb.setAttribute("cy", "14");
+        bulb.setAttribute("rx", "5.5"); bulb.setAttribute("ry", "9");
+        const color = bulbColors[k % bulbColors.length];
+        bulb.setAttribute("fill", color);
+        bulb.setAttribute("class", "bulb");
+        bulb.style.filter = `drop-shadow(0 0 6px ${color})`;
+        bulb.style.animationDelay = `${(k * 0.37) % 3}s`;
+        g.appendChild(cap); g.appendChild(bulb);
+        lightsSvg.appendChild(g);
+        k++;
+      }
+    }
+  }
+  drawLights();
+  window.addEventListener("resize", drawLights);
+
+  // ---------- Snowfall ----------
+  const canvas = document.getElementById("snow");
+  const ctx = canvas.getContext("2d");
+  let flakes = [], W = 0, H = 0;
+  const snowColor = () => getComputedStyle(document.documentElement).getPropertyValue("--snow").trim() || "#fff";
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.round(Math.min(160, (W * H) / 9000));
+    flakes = Array.from({ length: count }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 1 + Math.random() * 3,
+      vy: 0.3 + Math.random() * 0.9,
+      phase: Math.random() * Math.PI * 2,
+      drift: 0.3 + Math.random() * 0.6
+    }));
+  }
+
+  function draw(move) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = snowColor();
+    for (const f of flakes) {
+      if (move) {
+        f.y += f.vy;
+        f.phase += 0.01;
+        f.x += Math.sin(f.phase) * f.drift;
+        if (f.y > H + 5) { f.y = -5; f.x = Math.random() * W; }
+      }
+      ctx.globalAlpha = 0.55 + f.r / 8;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function loop() { draw(true); requestAnimationFrame(loop); }
+
+  resize();
+  window.addEventListener("resize", () => { resize(); if (reduceMotion) draw(false); });
+  if (reduceMotion) draw(false); else loop();
+</script>
+</body>
+</html>
