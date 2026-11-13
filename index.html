@@ -107,6 +107,26 @@
     color: var(--berry);
   }
 
+  .leave {
+    margin: 2.5rem 0 0;
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+  }
+  .leave-time {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 5.5vw, 3.2rem);
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .is-leaving .leave-time { color: var(--berry); }
+  .is-done .leave { display: none; }
+
   .done { display: none; }
   .is-done .clock { display: none; }
   .is-done .done { display: block; }
@@ -178,6 +198,8 @@
     <div class="unit"><span class="num" id="s">00</span><span class="lbl">seconds</span></div>
   </div>
 
+  <p class="leave"><span id="leaveLabel">We leave in</span> <span class="leave-time" id="leave">0:00:00</span></p>
+
   <div class="done" aria-live="polite">
     <p>Glædelig jul!<br>The party has started.</p>
     <small id="since"></small>
@@ -187,6 +209,8 @@
 <script>
   // 14:30 Copenhagen time on 13 November 2026 (CET, UTC+1)
   const TARGET = Date.parse("2026-11-13T14:30:00+01:00");
+  // Time to leave: 14:25 Copenhagen time
+  const LEAVE = Date.parse("2026-11-13T14:25:00+01:00");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------- Countdown ----------
@@ -195,10 +219,23 @@
   const mEl = document.getElementById("m");
   const sEl = document.getElementById("s");
   const since = document.getElementById("since");
+  const leaveEl = document.getElementById("leave");
+  const leaveLabel = document.getElementById("leaveLabel");
   const pad = n => String(n).padStart(2, "0");
 
   function tick() {
     const left = TARGET - Date.now();
+
+    const leftLeave = LEAVE - Date.now();
+    if (leftLeave <= 0) {
+      app.classList.add("is-leaving");
+      leaveLabel.textContent = "";
+      leaveEl.textContent = "Time to leave!";
+    } else {
+      const lt = Math.floor(leftLeave / 1000);
+      leaveEl.textContent = `${Math.floor(lt / 3600)}:${pad(Math.floor((lt % 3600) / 60))}:${pad(lt % 60)}`;
+    }
+
     if (left <= 0) {
       app.classList.add("is-done");
       const mins = Math.floor(-left / 60000);
